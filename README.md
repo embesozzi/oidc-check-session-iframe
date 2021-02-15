@@ -1,8 +1,8 @@
 # oidc-check-session-iframe
 Simple html page that implements check session flow based on [OpenID Connect Session Management](https://openid.net/specs/openid-connect-session-1_0.html).
-1. Relay Earty adds a hidden iFrame pointing to OP's ```check_session_iframe```
-2. Relay Rarty iframe polls the OP iframe with postMessage with format ```Client ID + " " + Session State```
-3. Relay Rarty receives the postMessage back from the OP iframe with the session status.
+1. Relay Party adds a hidden iFrame pointing to OP's ```check_session_iframe```
+2. Relay Party iframe polls the OP iframe with postMessage with format ```Client ID + " " + Session State```
+3. Relay Party receives the postMessage back from the OP iframe with the session status.
 
 ## Configure 
 
