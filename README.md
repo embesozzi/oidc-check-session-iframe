@@ -1,8 +1,13 @@
 # oidc-check-session-iframe
-Simple html page for implementing check session iframe based on OpenID Connect Session Management 1.
+Simple html page that implements check session flow based on [OpenID Connect Session Management](https://openid.net/specs/openid-connect-session-1_0.html).
+1. Relay Earty adds a hidden iFrame pointing to OP's ```check_session_iframe```
+2. Relay Rarty iframe polls the OP iframe with postMessage with format ```Client ID + " " + Session State```
+3. Relay Rarty receives the postMessage back from the OP iframe with the session status.
 
+## Configure 
 
-1. Adjust OpenId Provider Setting
+### Adjust OpenID Provider and App settings
+
 Go to the file `index.html` and change the config variables values, for example:
 
 ```javascript
@@ -14,8 +19,10 @@ Go to the file `index.html` and change the config variables values, for example:
         appRedirectUri : "http://localhost"
     }
 ```
+## Build and run
 
-2. Launch the demo application
-Just run the `update.sh` script. It will build the image based on `nginx:alpine` and will expose the app in the port 80.
+### Launch the demo application
 
-![App home](screenshot_1.png)
+Just run the `update.sh` script. It will build the app image based on `nginx:alpine` and will expose the app in the port 80.
+
+![App home](screenshot-1.png)
