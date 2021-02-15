@@ -9,23 +9,24 @@
     <title>Check Session Demo</title>
   </head>
      <script>
+      /***
+       * Check session iframe demostration based on specs: https://openid.net/specs/openid-connect-session-1_0.html
+       * 1. Create a hidden iframe pointing to IDP iframe check session uri
+       * 2. (Optional) Get session state value from IDP response parsing the URI
+       * 3. Send a message with the format: client-id + " " + session-state to the hidden iframe
+       * 4. Analize the iframe message response 
+       * 
+       * Author: embesozzi
+       */
+
       var config = {
           opCheckSessionIframe : "http://localhost:8080/auth/realms/master/protocol/openid-connect/login-status-iframe.html",
           opAuthEndpoint: "http://localhost:8080/auth/realms/master/protocol/openid-connect/auth",
           opOriginDomain : "http://localhost:8080",
           appClientId : "test",
-          appRedirectUri : "http%3A%2F%2Flocalhost"
+          appRedirectUri : "http://localhost"
       }
-      /***
-       * Check session demostration based on specs: https://openid.net/specs/openid-connect-session-1_0.html
-       * 1. Create a hidden iframe pointing to IDP iframe check session uri
-       * 2. (Optional) Get session state value from IDP response parsing the URI
-       * 3. Send a message with the format: client-id + " " + session-state to the hidden iframe
-       * 4. Analize the response 
-       * 
-       * Author: embesozzi
-       */
-
+       
       function init() {
 	      var checkSessionUrl = config.opCheckSessionIframe;
 	      var iframe = document.createElement('iframe');
@@ -63,7 +64,7 @@
      
     function authRequest(){
       // Send the resquest OAuth auth code flow in order to get the session state value from IDP response.
-      var authRequest = config.opAuthEndpoint + "?&response_type=code&client_id=" + config.appClientId + "&redirect_uri=" + config.appRedirectUri;
+      var authRequest = config.opAuthEndpoint + "?&response_type=code&client_id=" + config.appClientId + "&redirect_uri=" + encodeURIComponent(config.appRedirectUri);
       window.location.href = authRequest;
     }
 
