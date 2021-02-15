@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj" crossorigin="anonymous"></script>
+    <title>Check Session Demo</title>
+  </head>
+     <script>
+      var config = {
+          opCheckSessionIframe : "http://localhost:8080/auth/realms/master/protocol/openid-connect/login-status-iframe.html",
+          opAuthEndpoint: "http://localhost:8080/auth/realms/master/protocol/openid-connect/auth",
+          opOriginDomain : "http://localhost:8080",
+          appClientId : "test",
+          appRedirectUri : "http%3A%2F%2Flocalhost"
+      }
+      /***
+       * Check session demostration based on specs: https://openid.net/specs/openid-connect-session-1_0.html
+       * 1. Create a hidden iframe pointing to IDP iframe check session uri
+       * 2. (Optional) Get session state value from IDP response parsing the URI
+       * 3. Send a message with the format: client-id + " " + session-state to the hidden iframe
+       * 4. Analize the response 
+       * 
+       * Author: embesozzi
+       */
+
+      function init() {
+	      var checkSessionUrl = config.opCheckSessionIframe;
+	      var iframe = document.createElement('iframe');
+        var body = document.getElementsByTagName('body')[0];
+	      iframe.style.display = 'none';
+        iframe.src = checkSessionUrl;
+        iframe.id = "op";
+        body.appendChild(iframe);
+
+
+        // Parse and get session state value from URI when it is redirected back from IDP response
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionStateParam = urlParams.get('session_state');
+        document.getElementById("sessionState").value = (sessionStateParam) ? sessionStateParam: "";    
+     }
+
+    window.addEventListener("message", receiveMessage, false)
+     
+    function receiveMessage(e){ 
+       console.log("Received message: " + e);
+       //TODO: Check if message origin is trusted
+       document.getElementById("response").innerHTML = e.data; 
+     }
+     
+    function checkSession(){
+    
+      var sessionState = document.getElementById("sessionState").value;
+	    var clientId = document.getElementById("clientId").value;
+      var opFrameId ="op";
+    	var msg =  clientId + " " + sessionState;
+	    console.log("Sending message: " + msg);
+      var win = window.parent.frames[opFrameId].contentWindow;
+    	win.postMessage(msg, config.opOriginDomain);
+    }
+     
+    function authRequest(){
+      // Send the resquest OAuth auth code flow in order to get the session state value from IDP response.
+      var authRequest = config.opAuthEndpoint + "?&response_type=code&client_id=" + config.appClientId + "&redirect_uri=" + config.appRedirectUri;
+      window.location.href = authRequest;
+    }
+
+    </script>
+  </head>
+  
+  <body onload="init();">
+    <div class="container mt-1">
+      <h2>Check Session Demo</h2>
+      <div class="row g-2">
+        <div class="col-md">
+          <div class="form-floating">
+            <input type="email" class="form-control" id="clientId" placeholder="Client ID" value="test">
+            <label for="floatingInputGrid">Client ID</label>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-floating">
+            <div class="form-floating">
+            <input type="email" class="form-control" id="sessionState" placeholder="name@example.com" value="">
+            <label for="floatingInputGrid">Session State</label>
+          </div>
+        </div>
+      </div>
+      <div class="d-grid gap-2">
+        <button type="button" class="btn btn-info" onclick="authRequest()">Request Auth Code & Session State</button>
+      </div> 
+      <div class="d-grid gap-2">
+          <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample" onclick="checkSession()">Check Session iFrame</button>
+      </div> 
+      <div class="collapse" id="collapseExample"> 
+         <div class="card card-body" id="response"></div>
+      </div> 
+      <div class="mb-3 mt-5">
+        <ul class="list-unstyled">
+          <li>Response status reference:
+             <ul>
+              <li><strong>unchanged</strong> to indicate the user authentication status at the OpenID provider has not changed.</li>
+              <li><strong>changed</strong> to indicate that the user authentication status has changed, e.g. due to logout, an expired session or some other event.</li>
+              <li><strong>error</strong> if the posted message is malformed and the OpenID provider JavaScript couldn't parse the client ID, session state and origin from it.</li>
+            </ul>
+          </li>
+       </ul>
+      </div>  
+  </body>
+</html>
